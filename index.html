@@ -1,14 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lagn="en">
 <head>
   <meta charset="UTF-8">
-  <title>Enhanced JS Drum Kit</title>
+  <title>JS Drum Kit</title>
   <link rel="stylesheet" href="style.css">
   <link rel="icon" href="https://fav.farm/✅" />
 </head>
 <body>
   
   <h1>Drum Kit</h1>
+
 
   <div class="keys">
     <div data-key="65" class="key">
@@ -49,12 +50,6 @@
     </div>
   </div>
 
-  <div class="controls">
-    <button id="recordBtn">Record</button>
-    <button id="playBtn" disabled>Play</button>
-    <button id="clearBtn" disabled>Clear</button>
-  </div>
-
   <audio data-key="65" src="./sounds/clap.wav"></audio>
   <audio data-key="83" src="./sounds/hihat.wav"></audio>
   <audio data-key="68" src="./sounds/kick.wav"></audio>
@@ -66,128 +61,25 @@
   <audio data-key="76" src="./sounds/tink.wav"></audio>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Audio context for better sound control
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    const audioContext = new AudioContext();
-    
-    // Play sound function with audio context
-    function playSound(keyCode) {
-      const audio = document.querySelector(`audio[data-key="${keyCode}"]`);
-      const key = document.querySelector(`div[data-key="${keyCode}"]`);
-      
-      if (!audio) return;
-      
-      // For better audio handling
-      const source = audioContext.createMediaElementSource(audio);
-      source.connect(audioContext.destination);
-      
-      key.classList.add('playing');
-      audio.currentTime = 0;
-      audio.play().catch(e => console.log("Audio play failed:", e));
-    }
-    
-    // Remove transition class
-    function removeTransition(e) {
-      if (e.propertyName !== 'transform') return;
-      this.classList.remove('playing');
-    }
-    
-    // Handle keyboard events
-    function handleKeydown(e) {
-      playSound(e.keyCode);
-      if (isRecording) {
-        recordHit(e.keyCode);
-      }
-    }
-    
-    // Handle click events (single click)
-    function handleClick() {
-      const keyCode = this.getAttribute('data-key');
-      playSound(keyCode);
-      if (isRecording) {
-        recordHit(keyCode);
-      }
-    }
-    
-    // Handle double click events
-    function handleDoubleClick() {
-      const keyCode = this.getAttribute('data-key');
-      playSound(keyCode);
-      setTimeout(() => playSound(keyCode), 100); // Play again after 100ms
-      if (isRecording) {
-        recordHit(keyCode);
-        setTimeout(() => recordHit(keyCode), 100);
-      }
-    }
-    
-    // Recording functionality
-    let isRecording = false;
-    let recordedSequence = [];
-    let startTime;
-    const recordBtn = document.getElementById('recordBtn');
-    const playBtn = document.getElementById('playBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    
-    function recordHit(keyCode) {
-      const time = Date.now() - startTime;
-      recordedSequence.push({ keyCode, time });
-    }
-    
-    recordBtn.addEventListener('click', function() {
-      isRecording = !isRecording;
-      this.textContent = isRecording ? 'Stop Recording' : 'Record';
-      playBtn.disabled = isRecording;
-      
-      if (isRecording) {
-        startTime = Date.now();
-        recordedSequence = [];
-        console.log('Recording started...');
-      } else {
-        console.log('Recording stopped. Sequence:', recordedSequence);
-        playBtn.disabled = false;
-        clearBtn.disabled = false;
-      }
-    });
-    
-    playBtn.addEventListener('click', function() {
-      if (recordedSequence.length === 0) return;
-      
-      const startTime = Date.now();
-      recordedSequence.forEach(note => {
-        setTimeout(() => {
-          playSound(note.keyCode);
-        }, note.time);
-      });
-    });
-    
-    clearBtn.addEventListener('click', function() {
-      recordedSequence = [];
-      this.disabled = true;
-      playBtn.disabled = true;
-    });
-    
-    // Set up event listeners
-    const keys = Array.from(document.querySelectorAll('.key'));
-    
-    keys.forEach(key => {
-      // Keyboard interaction
-      key.addEventListener('transitionend', removeTransition);
-      
-      // Mouse/touch interactions
-      key.addEventListener('click', handleClick);
-      key.addEventListener('dblclick', handleDoubleClick);
-      
-      // Touch support for mobile devices
-      key.addEventListener('touchstart', function(e) {
-        e.preventDefault();
-        handleClick.call(this);
-      });
-    });
-    
-    window.addEventListener('keydown', handleKeydown);
-  });
+  function removeTransition(e) {
+    if (e.propertyName !== 'transform') return;
+    e.target.classList.remove('playing');
+  }
+
+  function playSound(e) {
+    const audio = document.querySelector(`audio[data-key="${e.keyCode}"]`);
+    const key = document.querySelector(`div[data-key="${e.keyCode}"]`);
+    if (!audio) return;
+
+    key.classList.add('playing');
+    audio.play();
+  }
+
+  const keys = Array.from(document.querySelectorAll('.key'));
+  keys.forEach(key => key.addEventListener('transitionend', removeTransition));
+  window.addEventListener('keydown', playSound);
 </script>
+
 
 </body>
 </html>
